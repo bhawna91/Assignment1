@@ -5,6 +5,28 @@ int low=0,high=0;
 int blocked[40]={0};
 int clist[50]={0};
 int bnum=0,cnum=0;
+int mclicks=0;   //will contain minimum clicks
+int clicks[7]={0};  //will calculate minclcicks for each of the set of situations
+int curr_ch;   //current channel
+
+
+int min_clicks();
+int get_digits(int x);
+int init(int* x,int n);
+int min_val(int* x,int n);
+void get_data();
+void channel_up(int i,int index);
+void channel_down(int i,int index);
+int min_clicks();
+
+
+int main()
+{
+  get_data();
+  printf("\n\n%d",min_clicks());
+  getch();
+}
+
 
 int get_digits(int x)  /*returns the number of digits in the channel when the channel is keyed in*/
 {
@@ -17,12 +39,14 @@ int get_digits(int x)  /*returns the number of digits in the channel when the ch
 return count;
 }
 
+
 int init(int* x,int n)  /*to initialize the number of clicks to 0 for each of the procedures followed*/
 {
     int i;
     for(i=0;i<n;i++)
       x[i]=0;
 }
+
 
 int min_val(int* x,int n) /*returns the minclicks value among all the procedures followed*/
 {
@@ -36,9 +60,8 @@ int min_val(int* x,int n) /*returns the minclicks value among all the procedures
     return min;
 }
 
-int min_clicks();
 
-int main()
+void get_data()
 {
  char low_high[10];
  char blocked_list[210];
@@ -76,138 +99,94 @@ int main()
        clist[cnum]=clist[cnum]*10+(channel_list[i]-48);
      i++;
     }
-  printf("\n\n%d",min_clicks());
-  getch();
 }
+
+
+void channel_up(int i,int index)
+{
+     int j;
+     while(curr_ch!=clist[i])
+        {
+         if(curr_ch==high)
+            curr_ch=low;
+         else
+            curr_ch++;
+         for(j=0;j<=bnum;j++)
+           {
+            if(blocked[j]==curr_ch)
+              {
+               if(curr_ch==high)
+                  curr_ch=low;
+               else
+                  curr_ch++;
+               j=0;
+              }
+           }
+          clicks[index]++;
+         }
+}
+
+
+void channel_down(int i,int index)
+{
+     int j;
+     while(curr_ch!=clist[i])
+        {
+         if(curr_ch==low)
+            curr_ch=high;
+         else
+            curr_ch--;
+         for(j=0;j<=bnum;j++)
+           {
+            if(blocked[j]==curr_ch)
+              {
+               if(curr_ch==low)
+                  curr_ch=high;
+               else
+                   curr_ch--;
+               j=0;
+              }
+           }
+          clicks[index]++;
+         }
+}
+
 
 int min_clicks()
 {
-    int mclicks=0;   //will contain minimum clicks
-    int clicks[7]={0};  //will calculate minclcicks for each of the set of situations
-    int i,j,curr_ch;
+    int i;
     mclicks+=get_digits(clist[0]);  //for the first channel, you will always key in the digits
     curr_ch=clist[0];
     for(i=1;i<=cnum;i++)  //run loop from second channel to cnum
      {
       init(clicks,8);  //initialize clicks to 0 at the beginning of every iteration
+
       clicks[0]=get_digits(clist[i]);
       //end of part 1 - directly key in the digits
+
       curr_ch=clist[i-1];
-      while(curr_ch!=clist[i])
-        {
-         if(curr_ch==high)
-            curr_ch=low;
-         else
-            curr_ch++;
-         for(j=0;j<=bnum;j++)
-           {
-            if(blocked[j]==curr_ch)
-              {
-               if(curr_ch==high)
-                  curr_ch=low;
-               else
-                  curr_ch++;
-               j=0;
-              }
-           }
-          clicks[1]++;
-         }
+      channel_up(i,1);
       //end of part 2 - keep pressing up
 
       curr_ch=clist[i-1];
-      j=0;
-      while(curr_ch!=clist[i])
-        {
-         if(curr_ch==low)
-            curr_ch=high;
-         else
-            curr_ch--;
-         for(j=0;j<=bnum;j++)
-           {
-            if(blocked[j]==curr_ch)
-              {
-               if(curr_ch==low)
-                  curr_ch=high;
-               else
-                   curr_ch--;
-               j=0;
-              }
-           }
-          clicks[2]++;
-         }
+      channel_down(i,2);
       //end of part 3 - keep pressing down
 
       curr_ch=low;
       clicks[3]+=get_digits(low);
-      while(curr_ch!=clist[i])
-        {
-         if(curr_ch==low)
-            curr_ch=high;
-         else
-            curr_ch--;
-         for(j=0;j<=bnum;j++)
-           {
-            if(blocked[j]==curr_ch)
-              {
-               if(curr_ch==low)
-                  curr_ch=high;
-               else
-                   curr_ch--;
-               j=0;
-              }
-           }
-          clicks[3]++;
-         }
+      channel_down(i,3);
       //end of part 4 - key in min value and go back
 
       curr_ch=high;
       clicks[4]+=get_digits(high);
-      while(curr_ch!=clist[i])
-        {
-         if(curr_ch==high)
-            curr_ch=low;
-         else
-            curr_ch++;
-
-         for(j=0;j<=bnum;j++)
-           {
-            if(blocked[j]==curr_ch)
-              {
-               if(curr_ch==high)
-                  curr_ch=low;
-               else
-                  curr_ch++;
-               j=0;
-              }
-           }
-          clicks[4]++;
-         }
+      channel_up(i,4);
       //end of part 5 - key in max value and go forward
 
      if(i>1)
      {
       curr_ch=clist[i-2];
       clicks[5]++;
-      while(curr_ch!=clist[i])
-        {
-         if(curr_ch==high)
-            curr_ch=low;
-         else
-            curr_ch++;
-
-         for(j=0;j<=bnum;j++)
-           {
-            if(blocked[j]==curr_ch)
-              {
-               if(curr_ch==high)
-                  curr_ch=low;
-               else
-                  curr_ch++;
-               j=0;
-              }
-           }
-          clicks[5]++;
-         }
+      channel_up(i,5);
      }
      else
         clicks[5]=10000;
@@ -217,25 +196,7 @@ int min_clicks()
      {
       curr_ch=clist[i-2];
       clicks[6]++;
-      while(curr_ch!=clist[i])
-        {
-         if(curr_ch==low)
-            curr_ch=high;
-         else
-            curr_ch--;
-         for(j=0;j<=bnum;j++)
-           {
-            if(blocked[j]==curr_ch)
-              {
-               if(curr_ch==low)
-                  curr_ch=high;
-               else
-                   curr_ch--;
-               j=0;
-              }
-           }
-          clicks[6]++;
-         }
+      channel_down(i,6);
      }
      else
         clicks[6]=10000;
